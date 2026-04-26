@@ -11,6 +11,8 @@ public final class MythicRewards extends JavaPlugin {
 
     public static MythicRewards instance;
 
+    public static final boolean freeVersion = true;
+
     public static int yearVersion;
 
     public static int majorVersion;

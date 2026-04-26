@@ -40,11 +40,8 @@ public class ActionManager {
         registerNewAction("any", new ActionAny());
         registerNewAction("conditional", new ActionConditional());
         registerNewAction("mythicmobs_spawn", new ActionMythicMobsSpawn());
-        if (InitManager.initManager.getLicenseType() != LicenseType.ACTION_TYPE_LIMITED) {
-            TextUtil.sendMessage(null, TextUtil.pluginPrefix() + " §cLicense ATL do not allow you use give_item and drop_item actions, ignored those action in configs!");
-            registerNewAction("drop_item", new ActionDropItem());
-            registerNewAction("give_item", new ActionGiveItem());
-        }
+        registerNewAction("drop_item", new ActionDropItem());
+        registerNewAction("give_item", new ActionGiveItem());
     }
 
     public void registerNewAction(String actionID,

@@ -5,18 +5,19 @@ api-version: '1.14'
 folia-supported: true
 author: PQguanfang
 softdepend:
+  # Item
   - MMOItems
-  - MythicLib
   - ItemsAdder
   - Oraxen
+  - Nexo
   - EcoItems
   - EcoArmor
-  - PlaceholderAPI
   - MythicMobs
+  - ExecutableItems
   - CraftEngine
   - NeigeItems
-  - ExecutableItems
-  - MythicChanger
+  - eco
+  # Others
   - NBTAPI
   - LevelledMobs
   - MythicChanger

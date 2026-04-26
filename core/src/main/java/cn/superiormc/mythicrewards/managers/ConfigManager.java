@@ -29,10 +29,6 @@ public class ConfigManager {
     public ConfigManager() {
         configManager = this;
         config = MythicRewards.instance.getConfig();
-        InitManager.initManager.initLicense("cn.superiormc.ultimateshop.UltimateShop",
-                "cn.superiormc.mythicprefixes.MythicPrefixes",
-                "cn.superiormc.mythictotem.MythicTotem",
-                "cn.superiormc.mythicchanger.MythicChanger");
         initRulesConfigs();
     }
 
@@ -64,8 +60,8 @@ public class ConfigManager {
                     ObjectSingleRule rule = new ObjectSingleRule(substring, YamlConfiguration.loadConfiguration(file));
                     ruleCaches.add(rule);
                     ruleMap.put(substring, rule);
-                    if (ruleMap.size() >= 8 && InitManager.initManager.getLicenseType() == LicenseType.NUMBER_OF_RULES_LIMITED) {
-                        TextUtil.sendMessage(null, TextUtil.pluginPrefix() + " §cLicense NORL only allows you create up to 8 reward rules, ignored excess rules!");
+                    if (ruleMap.size() >= 8 && MythicRewards.freeVersion) {
+                        TextUtil.sendMessage(null, TextUtil.pluginPrefix() + " §cError: Free version only allows you create up to 8 reward rules, ignored excess rules!");
                         break;
                     }
                     TextUtil.sendMessage(null, TextUtil.pluginPrefix() + " §fLoaded reward rule: " + fileName + "!");
@@ -116,6 +112,10 @@ public class ConfigManager {
             TextUtil.sendMessage(null, TextUtil.pluginPrefix() + " §fNow entity cache amount: " + entityMatchMap.size() + "!");
         }
         entityMatchMap.remove(entity);
+    }
+
+    public Map<Entity, ObjectSingleRule> getEntityMatchMap() {
+        return entityMatchMap;
     }
 
     public boolean getBoolean(String path) {

@@ -210,7 +210,7 @@ public class TextUtil {
             return;
         }
 
-        if (!rawText.contains("[")) {
+        if (!rawText.contains("[") || MythicRewards.freeVersion) {
             MythicRewards.methodUtil.sendChat(player, rawText);
             return;
         }

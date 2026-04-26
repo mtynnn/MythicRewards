@@ -2,7 +2,9 @@ package cn.superiormc.mythicrewards.objects.actions;
 
 import cn.superiormc.mythicrewards.MythicRewards;
 import cn.superiormc.mythicrewards.listeners.TrackerResult;
+import cn.superiormc.mythicrewards.managers.ConfigManager;
 import cn.superiormc.mythicrewards.methods.BuildItem;
+import cn.superiormc.mythicrewards.utils.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,6 +20,9 @@ public class ActionDropItem extends AbstractRunAction {
 
     @Override
     protected void onDoAction(ObjectSingleAction singleAction, Player player, TrackerResult result) {
+        if (MythicRewards.freeVersion && ConfigManager.configManager.getEntityMatchMap().size() > 4) {
+            TextUtil.sendMessage(null, TextUtil.pluginPrefix() + " §cError: Free version can not use give_item or drop_item action when load more than 4 reward rule configs!");
+        }
         String worldName = singleAction.getString("world");
         Location location;
         if (worldName == null) {

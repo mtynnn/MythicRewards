@@ -30,12 +30,12 @@ public class LanguageManager {
         initLanguages();
     }
 
-    protected String getPlayerLanguage(Player player) {
+    public String getPlayerLanguage(Player player) {
         if (player == null) {
             return serverLanguage.toLowerCase();
         }
         try {
-            if (ConfigManager.configManager.getBoolean("config-files.per-player-language", true)) {
+            if (ConfigManager.configManager.getBoolean("config-files.per-player-language", true) && !MythicRewards.freeVersion) {
                 return player.getLocale().toLowerCase();
             } else {
                 return serverLanguage.toLowerCase();
