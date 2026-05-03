@@ -63,7 +63,6 @@ public class DamageListener implements Listener {
             event.setDroppedExp(singleRule.getDropExp());
         }
 
-
         if (MythicRewards.isFolia) {
             SchedulerUtil.runSync(boss, () -> {
                 ConfigManager.configManager.removeEntityMatchMap(boss);

@@ -11,3 +11,5 @@ plugin:
 
 command-tab:
   type-item-id: "[Type Item ID you want]"
+
+dupe-removed: "&#98FB98[UltimateShop] &fA illegal item from your inventory has been removed!"
