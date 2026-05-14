@@ -1,0 +1,4 @@
+cn\superiormc\mythicrewards\paper\utils\PaperTextUtil.class
+cn\superiormc\mythicrewards\paper\PaperMethodUtil.class
+cn\superiormc\mythicrewards\paper\methods\BuildItemPaper.class
+cn\superiormc\mythicrewards\paper\methods\DebuildItemPaper.class

@@ -1,0 +1,263 @@
+match-entity:
+  mythicmobs:
+    - "mega_warden"
+
+time-out-ticks: 6000
+prevent-vanilla-drops: false
+drop-exp: -1
+
+general-actions:
+  1:
+    type: give_item
+    rank-limit: 1
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "echo_plating"
+      amount: 2
+  2:
+    type: chance
+    rank-limit: 1
+    rate: 50
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "echo_plating"
+          amount: 1
+  3:
+    type: chance
+    rank-limit: 1
+    rate: 5
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "warderita_template"
+          amount: 1
+  4:
+    type: chance
+    rank-limit: 1
+    rate: 0.5
+    actions:
+      1:
+        type: any
+        amount: 1
+        actions:
+          1:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_chestplate"
+              amount: 1
+          2:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_leggings"
+              amount: 1
+          3:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_helmet"
+              amount: 1
+          4:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_boots"
+              amount: 1
+  5:
+    type: give_item
+    rank-limit: 1
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "sculk_soul"
+      amount: 32
+
+  6:
+    type: give_item
+    rank-limit: 2
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "echo_plating"
+      amount: 1
+  7:
+    type: chance
+    rank-limit: 2
+    rate: 30
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "echo_plating"
+          amount: 1
+  8:
+    type: chance
+    rank-limit: 2
+    rate: 3
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "warderita_template"
+          amount: 1
+  9:
+    type: chance
+    rank-limit: 2
+    rate: 0.2
+    actions:
+      1:
+        type: any
+        amount: 1
+        actions:
+          1:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_chestplate"
+              amount: 1
+          2:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_leggings"
+              amount: 1
+          3:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_helmet"
+              amount: 1
+          4:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_boots"
+              amount: 1
+  10:
+    type: give_item
+    rank-limit: 2
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "sculk_soul"
+      amount: 16
+
+  11:
+    type: give_item
+    rank-limit: 3
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "echo_plating"
+      amount: 1
+  12:
+    type: chance
+    rank-limit: 3
+    rate: 1
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "warderita_template"
+          amount: 1
+  13:
+    type: chance
+    rank-limit: 3
+    rate: 0.1
+    actions:
+      1:
+        type: any
+        amount: 1
+        actions:
+          1:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_chestplate"
+              amount: 1
+          2:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_leggings"
+              amount: 1
+          3:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_helmet"
+              amount: 1
+          4:
+            type: give_item
+            item:
+              hook-plugin: "Nexo"
+              hook-item: "warden_boots"
+              amount: 1
+  14:
+    type: give_item
+    rank-limit: 3
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "sculk_soul"
+      amount: 16
+
+  15:
+    type: give_item
+    rank-limit: 4~100
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "sculk_soul"
+      amount: 8
+  16:
+    type: chance
+    rank-limit: 4~100
+    rate: 5
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "echo_plating"
+          amount: 1
+  17:
+    type: chance
+    rank-limit: 4~100
+    rate: 0.1
+    actions:
+      1:
+        type: give_item
+        item:
+          hook-plugin: "Nexo"
+          hook-item: "warderita_template"
+          amount: 1
+
+ritual-bonus-actions:
+  1:
+    type: give_item
+    item:
+      hook-plugin: "Nexo"
+      hook-item: "sculk_soul"
+      amount: 1
+
+message-settings:
+  audience: "participants"
+  top-formats:
+    "1": "<yellow>1°</yellow><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><yellow>{damage}</yellow>"
+    "2": "<gold>2°</gold><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><gold>{damage}</gold>"
+    "3": "<red>3°</red><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><red>{damage}</red>"
+    "others": "<gray>{position}°</gray><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><gray>{damage}</gray>"
+  broadcast:
+    - "&8&m0                                                   0&r"
+    - "<#51a66c><b>{mob_display_name} ELIMINADO!</b>"
+    - ""
+    - "{top_players}"
+    - ""
+    - "{personal_damage}"
+    - "&8&m0                                                   0&r"
+  personal-damage: "<gray>Tu daño: </gray><green>{damage} ({percentage}%)</green>"
+  personal-no-damage: "<gray>No participaste en la batalla.</gray>"

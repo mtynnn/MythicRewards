@@ -14,8 +14,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
 public class ObjectSingleRule implements Comparable<ObjectSingleRule> {
 
@@ -28,6 +32,8 @@ public class ObjectSingleRule implements Comparable<ObjectSingleRule> {
     private final ObjectAction allActions;
 
     private Collection<ObjectAction> packActions;
+
+    private final ObjectAction ritualBonusActions;
 
     private final DamageTracker damageTracker;
 
@@ -42,6 +48,7 @@ public class ObjectSingleRule implements Comparable<ObjectSingleRule> {
         this.config = config;
         this.generalActions = new ObjectAction(config.getConfigurationSection("general-actions"));
         this.allActions = new ObjectAction(config.getConfigurationSection("all-actions"));
+        this.ritualBonusActions = new ObjectAction(config.getConfigurationSection("ritual-bonus-actions"));
         this.damageTracker = new DamageTracker(this);
         this.timeOutTicks = config.getLong("time-out-ticks", 6000);
         this.preventVanillaDrops = config.getBoolean("prevent-vanilla-drops");
@@ -86,7 +93,11 @@ public class ObjectSingleRule implements Comparable<ObjectSingleRule> {
     }
 
     public void startGiveAction(LivingEntity entity) {
-        TrackerResult trackerResult = new TrackerResult(damageTracker, entity);
+        startGiveAction(entity, Map.of());
+    }
+
+    public void startGiveAction(LivingEntity entity, Map<UUID, Integer> ritualPointsMap) {
+        TrackerResult trackerResult = new TrackerResult(damageTracker, entity, ritualPointsMap);
         List<Player> allPlayers = trackerResult.getAllPlayers();
 
         for (Player tempVal1 : allPlayers) {
@@ -115,7 +126,118 @@ public class ObjectSingleRule implements Comparable<ObjectSingleRule> {
                 }
             }
         }
+
+        if (!ritualBonusActions.isEmpty()) {
+            for (Player player : allPlayers) {
+                int extraRolls = trackerResult.getPlayerRitualExtraRolls(player);
+                for (int i = 0; i < extraRolls; i++) {
+                    ritualBonusActions.runAllActions(player, trackerResult);
+                }
+            }
+        }
+        sendSummaryMessage(entity, trackerResult, allPlayers);
         clearDamage(entity);
+    }
+
+    private void sendSummaryMessage(LivingEntity entity, TrackerResult trackerResult, List<Player> participants) {
+        ConfigurationSection messageSection = config.getConfigurationSection("message-settings");
+        if (messageSection == null) {
+            return;
+        }
+
+        List<String> broadcastLines = messageSection.getStringList("broadcast");
+        if (broadcastLines.isEmpty()) {
+            return;
+        }
+
+        String audience = messageSection.getString("audience", "participants");
+        Set<Player> recipients = new HashSet<>();
+        if ("world".equalsIgnoreCase(audience)) {
+            recipients.addAll(entity.getWorld().getPlayers());
+        } else {
+            recipients.addAll(participants);
+        }
+        if (recipients.isEmpty()) {
+            return;
+        }
+
+        List<String> topPlayersLines = buildTopPlayersLines(messageSection, trackerResult);
+        String personalDamageFormat = messageSection.getString("personal-damage", "<gray>Tu daño: </gray><green>{damage} ({percentage}%)</green>");
+        String personalNoDamage = messageSection.getString("personal-no-damage", "<gray>No participaste en la batalla.</gray>");
+
+        for (Player receiver : recipients) {
+            String personalLine = buildPersonalLine(receiver, trackerResult, personalDamageFormat, personalNoDamage);
+            for (String line : broadcastLines) {
+                if (line.contains("{top_players}")) {
+                    String prefix = line.replace("{top_players}", "").trim();
+                    if (!prefix.isEmpty()) {
+                        String parsedPrefix = prefix
+                                .replace("{personal_damage}", personalLine)
+                                .replace("{mob_display_name}", trackerResult.getEntityName() == null ? entity.getName() : trackerResult.getEntityName());
+                        TextUtil.sendMessage(receiver, TextUtil.parse(TextUtil.withPAPI(parsedPrefix, receiver)));
+                    }
+                    for (String topLine : topPlayersLines) {
+                        TextUtil.sendMessage(receiver, TextUtil.parse(TextUtil.withPAPI(topLine, receiver)));
+                    }
+                    continue;
+                }
+
+                String parsed = line
+                        .replace("{personal_damage}", personalLine)
+                        .replace("{mob_display_name}", trackerResult.getEntityName() == null ? entity.getName() : trackerResult.getEntityName());
+                TextUtil.sendMessage(receiver, TextUtil.parse(TextUtil.withPAPI(parsed, receiver)));
+            }
+        }
+    }
+
+    private List<String> buildTopPlayersLines(ConfigurationSection messageSection, TrackerResult trackerResult) {
+        ConfigurationSection topFormatsSection = messageSection.getConfigurationSection("top-formats");
+        String first = "<yellow>1°</yellow><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><yellow>{damage}</yellow>";
+        String second = "<gold>2°</gold><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><gold>{damage}</gold>";
+        String third = "<red>3°</red><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><red>{damage}</red>";
+        String others = "<gray>{position}°</gray><gray> ⏵</gray> {prefix}{player_name} <gray>⏵ </gray><gray>{damage}</gray>";
+        if (topFormatsSection != null) {
+            first = topFormatsSection.getString("1", first);
+            second = topFormatsSection.getString("2", second);
+            third = topFormatsSection.getString("3", third);
+            others = topFormatsSection.getString("others", others);
+        }
+
+        List<String> lines = new ArrayList<>();
+        int topLimit = messageSection.getInt("top-limit", 3);
+        int maxRank = Math.min(trackerResult.getResultSize(), Math.max(1, topLimit));
+        for (int rank = 1; rank <= maxRank; rank++) {
+            String format = switch (rank) {
+                case 1 -> first;
+                case 2 -> second;
+                case 3 -> third;
+                default -> others;
+            };
+            Player listedPlayer = Bukkit.getPlayerExact(trackerResult.getPlayerNameByRank(rank));
+            String listedPrefix = listedPlayer != null ? TextUtil.withPAPI("%vault_prefix%", listedPlayer) : "";
+            if ("%vault_prefix%".equalsIgnoreCase(listedPrefix)) {
+                listedPrefix = "";
+            }
+            String line = format
+                    .replace("{position}", String.valueOf(rank))
+                    .replace("{player_name}", trackerResult.getPlayerNameByRank(rank))
+                    .replace("{damage}", String.format("%.0f", trackerResult.getDamageByRank(rank)))
+                    .replace("{percentage}", String.format("%.1f", trackerResult.getPercentageByRank(rank)))
+                    .replace("{prefix}", listedPrefix);
+            lines.add(line);
+        }
+        return lines;
+    }
+
+    private String buildPersonalLine(Player receiver, TrackerResult trackerResult, String personalDamageFormat, String personalNoDamage) {
+        int rank = trackerResult.getPlayerRank(receiver);
+        if (rank == -1) {
+            return personalNoDamage;
+        }
+        return personalDamageFormat
+                .replace("{position}", String.valueOf(rank))
+                .replace("{damage}", String.format("%.0f", trackerResult.getPlayerDamage(receiver)))
+                .replace("{percentage}", String.format("%.1f", trackerResult.getPlayerPercentage(receiver)));
     }
 
     private Player weightedRandomPick(List<Player> players, TrackerResult trackerResult) {

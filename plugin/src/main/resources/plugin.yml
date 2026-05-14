@@ -22,6 +22,7 @@ softdepend:
   - LevelledMobs
   - MythicChanger
   - EnchantedMobs
+  - VtAlters
 commands:
   mythicrewards:
     aliases:

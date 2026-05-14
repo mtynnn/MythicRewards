@@ -13,6 +13,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import java.util.Map;
+import java.util.UUID;
+
 public class DamageListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -55,7 +58,8 @@ public class DamageListener implements Listener {
         if (singleRule == null) {
             return;
         }
-        singleRule.startGiveAction(boss);
+        Map<UUID, Integer> ritualPoints = RitualContributionUtil.readRitualPoints(boss);
+        singleRule.startGiveAction(boss, ritualPoints);
         if (singleRule.isPreventVanillaDrops()) {
             event.getDrops().clear();
         }

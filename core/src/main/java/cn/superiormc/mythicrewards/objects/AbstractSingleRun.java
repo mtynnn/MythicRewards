@@ -45,7 +45,9 @@ public abstract class AbstractSingleRun {
                 "total-damage", String.format(ConfigManager.configManager.getString("placeholders.result.damage-format"), result.getTotalDamage()),
                 "rank", String.valueOf(result.getPlayerRank(player)),
                 "damage", String.format(ConfigManager.configManager.getString("placeholders.result.damage-format"), result.getPlayerDamage(player)),
-                "percentage", String.format(ConfigManager.configManager.getString("placeholders.result.percentage-format"), result.getPlayerPercentage(player))
+                "percentage", String.format(ConfigManager.configManager.getString("placeholders.result.percentage-format"), result.getPlayerPercentage(player)),
+                "ritual-points", String.valueOf(result.getPlayerRitualPoints(player)),
+                "ritual-rolls", String.valueOf(result.getPlayerRitualExtraRolls(player))
         );
 
         content = TextUtil.withPAPI(result.parseResultPlaceholders(content), player);

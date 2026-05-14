@@ -4,6 +4,7 @@ import cn.superiormc.mythicrewards.MythicRewards;
 import cn.superiormc.mythicrewards.managers.ConfigManager;
 import cn.superiormc.mythicrewards.utils.SchedulerUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -27,7 +28,15 @@ public class TrackerResult {
 
     private final Map<Player, SinglePlayerResult> playerResultCache = new HashMap<>();
 
+    private final Map<UUID, Integer> ritualPointsByPlayer;
+
+    private final Map<UUID, Integer> ritualExtraRollsByPlayer;
+
     public TrackerResult(DamageTracker damageTracker, LivingEntity entity) {
+        this(damageTracker, entity, new HashMap<>());
+    }
+
+    public TrackerResult(DamageTracker damageTracker, LivingEntity entity, Map<UUID, Integer> ritualPointsMap) {
         this.damageTracker = damageTracker;
         this.entity = entity;
 
@@ -60,6 +69,8 @@ public class TrackerResult {
         }
 
         this.results = Collections.unmodifiableList(list);
+        this.ritualPointsByPlayer = Collections.unmodifiableMap(new HashMap<>(ritualPointsMap));
+        this.ritualExtraRollsByPlayer = Collections.unmodifiableMap(buildRitualExtraRollsMap());
     }
 
     public double getTotalDamage() {
@@ -72,6 +83,10 @@ public class TrackerResult {
 
     public List<SinglePlayerResult> getResults() {
         return results;
+    }
+
+    public int getResultSize() {
+        return results.size();
     }
 
     public SinglePlayerResult getPlayerByRank(int rank) {
@@ -126,6 +141,66 @@ public class TrackerResult {
         return entity;
     }
 
+    public int getPlayerRitualPoints(Player player) {
+        if (player == null) {
+            return 0;
+        }
+        return ritualPointsByPlayer.getOrDefault(player.getUniqueId(), 0);
+    }
+
+    public int getPlayerRitualExtraRolls(Player player) {
+        if (player == null) {
+            return 0;
+        }
+        return ritualExtraRollsByPlayer.getOrDefault(player.getUniqueId(), 0);
+    }
+
+    public int getPlayerRitualPointsByRank(int rank) {
+        SinglePlayerResult r = getPlayerByRank(rank);
+        if (r == null) {
+            return 0;
+        }
+        return ritualPointsByPlayer.getOrDefault(r.playerUUID(), 0);
+    }
+
+    public int getPlayerRitualExtraRollsByRank(int rank) {
+        SinglePlayerResult r = getPlayerByRank(rank);
+        if (r == null) {
+            return 0;
+        }
+        return ritualExtraRollsByPlayer.getOrDefault(r.playerUUID(), 0);
+    }
+
+    private Map<UUID, Integer> buildRitualExtraRollsMap() {
+        Map<UUID, Integer> extraRolls = new HashMap<>();
+        int pointsPerRoll = Math.max(1, ConfigManager.configManager.getInt("ritual-bonus.points-per-roll", 1));
+        double minDamage = ConfigManager.configManager.config.getDouble("ritual-bonus.min-damage", 1.0D);
+        boolean allowPresence = ConfigManager.configManager.getBoolean("ritual-bonus.allow-presence-fallback", true);
+        double presenceRadius = ConfigManager.configManager.config.getDouble("ritual-bonus.presence-radius", 32.0D);
+        double presenceRadiusSquared = presenceRadius * presenceRadius;
+        Location entityLocation = entity.getLocation();
+
+        for (SinglePlayerResult playerResult : results) {
+            int points = ritualPointsByPlayer.getOrDefault(playerResult.playerUUID(), 0);
+            if (points <= 0) {
+                continue;
+            }
+            boolean eligible = playerResult.damage() >= minDamage;
+            if (!eligible && allowPresence) {
+                Player online = Bukkit.getPlayer(playerResult.playerUUID());
+                if (online != null && online.getWorld().equals(entityLocation.getWorld())
+                        && online.getLocation().distanceSquared(entityLocation) <= presenceRadiusSquared) {
+                    eligible = true;
+                }
+            }
+            if (!eligible) {
+                continue;
+            }
+            extraRolls.put(playerResult.playerUUID(), Math.max(0, points / pointsPerRoll));
+        }
+        return extraRolls;
+    }
+
     public String parseResultPlaceholders(String content) {
         if (content == null) {
             return "";
@@ -135,6 +210,8 @@ public class TrackerResult {
             content = content.replace("{player_" + rank + "}", r.playerName());
             content = content.replace("{damage_" + rank + "}", String.format(ConfigManager.configManager.getString("placeholders.result.damage-format"), r.damage()));
             content = content.replace("{percentage_" + rank + "}", String.format(ConfigManager.configManager.getString("placeholders.result.percentage-format"), r.percentage()));
+            content = content.replace("{ritual-points_" + rank + "}", String.valueOf(getPlayerRitualPointsByRank(rank)));
+            content = content.replace("{ritual-rolls_" + rank + "}", String.valueOf(getPlayerRitualExtraRollsByRank(rank)));
         }
         if (entityName != null) {
             content = content.replace("{entity-name}", entityName);
